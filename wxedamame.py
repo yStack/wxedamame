@@ -43,6 +43,11 @@ INF = \
 </xml>
 '''
 
+def is_new_user(msg):
+    return msg['MsgType'] == 'event' and msg['Event'] == 'subscribe'
+
+FIRST_INF = ''' 输入城市名称即可查询天气！'''
+
 def weather_report(cityname):
     citycode = city.get(cityname)
     url = 'http://www.weather.com.cn/data/cityinfo/%s.html' % citycode
@@ -64,8 +69,11 @@ def re_msg():
     if request.method == 'POST':
         data = request.data
         msg = parse_msg(data)
-        weather_info = weather_report(msg['Content'].encode('utf-8'))
-        return response(msg,weather_info)
+        if is_new_user(msg):
+            return response(msg, FIRST_INF)
+        else:
+            weather_info = weather_report(msg['Content'].encode('utf-8'))
+            return response(msg, weather_info)
 
 
 if __name__ == "__main__":
