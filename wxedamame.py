@@ -13,7 +13,7 @@ def acess_verification():
     nonce = request.args.get('nonce')
     echostr = request.args.get('echostr')
 
-    token = 'edamame123'
+    token = 'your_token'
     tmplist = [token, timestamp, nonce]
     tmplist.sort()
     hashstr = hashlib.sha1(''.join(tmplist)).hexdigest()
