@@ -1,7 +1,8 @@
-# -*- coding:utf-8 -*-
 import hashlib
 import time
+import urllib2,json
 import xml.etree.ElementTree as ET
+from city import city
 from flask import Flask, render_template, request
 
 app = Flask(__name__)
@@ -18,6 +19,7 @@ def acess_verification():
     hashstr = hashlib.sha1(''.join(tmplist)).hexdigest()
     if hashstr == signature:
         return echostr
+
 
 def parse_msg(xml_string):
     root = ET.fromstring(xml_string)
@@ -41,18 +43,19 @@ INF = \
 </xml>
 '''
 
-HELP_INF = \
-'''
-你好
-'''
-
-def is_new_user(msg)
-    return msg['MsgType'] == "event" and msg['Event'] == "subscribe"
-
+def weather_report(cityname):
+    citycode = city.get(cityname)
+    url = 'http://www.weather.com.cn/data/cityinfo/%s.html' % citycode
+    content = urllib2.urlopen(url).read()
+    data = json.loads(content)
+    result = data['weatherinfo']
+    result_str = '%s\n:%s %s ~ %s' % (result['city'], result['weather'], result['temp2'], result['temp1'])
+    return result_str
 
 @app.route('/')
 def homepage():
      return render_template('index.html')
+
 
 @app.route('/weixin',methods = ['GET', 'POST'])
 def re_msg():
@@ -61,8 +64,8 @@ def re_msg():
     if request.method == 'POST':
         data = request.data
         msg = parse_msg(data)
-        if is_new_user(msg):
-            return response(msg,HELP_INF)
+        weather_info = weather_report(msg['Content'].encode('utf-8'))
+        return response(msg,weather_info)
 
 
 if __name__ == "__main__":
